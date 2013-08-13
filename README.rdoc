@@ -42,10 +42,10 @@ First, let's explain the "range" algorithm:
 * Could work on primary-key-less data.
 * Does NOT work well with data that could have inserts/deletes while you're looping (it might miss or duplicate random rows at the boundaries of batches)!  So it should only be used on data that you are sure will not change (such as locked data, or static data, etc).
 
- YourModel.each_by_ranges do |record|
+ YourModel.each_by_range do |record|
    # Do something with this model record
  end
- YourModel.batches_by_ranges do |batch|
+ YourModel.batches_by_range do |batch|
    # Do something with this batch
    # It's a standard model scope that's already been loaded
    # and can act like an array of records
