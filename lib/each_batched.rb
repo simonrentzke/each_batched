@@ -1,6 +1,4 @@
 
-require 'valium'
-
 #
 # More grouping/batching logic options than what's included in Rails.
 #
@@ -20,8 +18,8 @@ module EachBatched
   # * This algorithm may be slower than #batches_by_ids if your query doesn't execute very quickly.
   # * This algorithm can't be lazily loaded, because it checks for empty results to see when it's done.
   def batches_by_range(batch_size=DEFAULT_BATCH_SIZE)
-    start_offset = scoped.offset_value || 0
-    end_limit = scoped.limit_value # || nil
+    start_offset = all.offset_value || 0
+    end_limit = all.limit_value # || nil
     group_number = 0
     processed_number = 0
     # This giant while condition (with multiple assignments in it) is a mess, isn't it!
@@ -50,9 +48,9 @@ module EachBatched
   # * The yielded scope can be lazily loaded (though the id selection query has already run obviously)
   # * You can optionally give it some column other than the primary key to use, as long as it's guaranteed unique
   def batches_by_ids(batch_size=DEFAULT_BATCH_SIZE, key=nil)
-    reduced_scope = scoped.tap { |s| s.where_values = [] }.offset(nil).limit(nil)
-    key = primary_key if key.nil?
-    scoped.value_of(key).in_groups_of(batch_size, false) do |group_ids|
+    reduced_scope = all.tap { |s| s.where_values = [] }.offset(nil).limit(nil)
+    key = primary_key.to_sym if key.nil?
+    all.pluck(key).in_groups_of(batch_size, false) do |group_ids|
       # keeps select/group/joins/includes, inside inner batched scope
       yield reduced_scope.where(key => group_ids), group_ids
     end
